@@ -5,7 +5,6 @@ st.set_page_config(page_title="Macroeconomic Forecasting App")
 st.title("Macroeconomic Forecasting App")
 
 import numpy as np
-from xgboost import XGBRegressor
 from arch import arch_model
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.api import VAR
@@ -82,6 +81,10 @@ def fit_univariate(method, values, horizon):
 		fitted = model.fit(disp="off")
 		return fitted.forecast(horizon=horizon, reindex=False).mean.iloc[-1].to_numpy()
 	if method == "XGBoost":
+		try:
+			from xgboost import XGBRegressor
+		except ModuleNotFoundError as error:
+			raise ValueError("XGBoost is unavailable. Confirm xgboost is listed in requirements.txt and redeploy.") from error
 		lag_count = min(3, max(1, len(values) // 8))
 		features = np.asarray([
 			values[index - lag_count:index]
